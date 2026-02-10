@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --color-rose: #ff4d6d;
+            --color-rose-light: #ff8fa3;
+            --color-bg-start: #fff0f3;
+            --color-bg-end: #ffe5ec;
+            --color-text-primary: #590d22;
+            --color-text-secondary: #800f2f;
+            --color-white: #ffffff;
+            --shadow-soft: 0 10px 25px rgba(255, 77, 109, 0.2);
+            --shadow-hover: 0 15px 35px rgba(255, 77, 109, 0.3);
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Poppins', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: linear-gradient(135deg, var(--color-bg-start) 0%, var(--color-bg-end) 100%);
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--color-text-primary);
+            position: relative;
+        }
+
+        /* Floating Hearts Background */
+        .floating-hearts-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .heart-bg {
+            position: absolute;
+            color: var(--color-rose-light);
+            opacity: 0.3;
+            animation: floatUp linear infinite;
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(100vh) scale(0.5);
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.4;
+            }
+            100% {
+                transform: translateY(-10vh) scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        /* Main Container */
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 2rem;
+            max-width: 600px;
+            width: 90%;
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05); /* Very subtle shadow */
+            transition: opacity 0.8s ease-in-out, transform 0.8s ease-in-out;
+        }
+
+        h1 {
+            font-family: var(--font-heading);
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            color: var(--color-text-primary);
+            line-height: 1.2;
+        }
+
+        p.subtext {
+            font-size: 1.2rem;
+            color: var(--color-text-secondary);
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+        }
+
+        /* Buttons */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            position: relative; /* Context for absolute positioning if needed inside, though No button will be fixed/absolute globally or relative to body */
+        }
+        
+        button {
+            padding: 1rem 3rem;
+            border: none;
+            border-radius: 50px;
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            outline: none;
+        }
+
+        .btn-yes {
+            background-color: var(--color-rose);
+            color: var(--color-white);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .btn-yes:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: var(--shadow-hover);
+            background-color: #ff3355; 
+        }
+
+        /* Sparkle effect on hover */
+        .btn-yes::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+            transform: scale(0);
+            opacity: 0;
+            transition: opacity 0.3s, transform 0.3s;
+            pointer-events: none;
+        }
+
+        .btn-yes:hover::after {
+            opacity: 1;
+            transform: scale(1);
+            animation: sparkle 1s infinite alternate;
+        }
+
+        @keyframes sparkle {
+            0% { opacity: 0.3; transform: scale(0.8) rotate(0deg); }
+            100% { opacity: 0.8; transform: scale(1.2) rotate(180deg); }
+        }
+
+        .btn-no {
+            background-color: var(--color-white);
+            color: var(--color-text-secondary);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255, 77, 109, 0.2);
+            /* Important for movement logic */
+            position: relative; 
+            transition: transform 0.2s ease-out; /* Faster transition for the run-away effect */
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            text-align: center;
+            z-index: 20;
+            animation: fadeInScale 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        .success-message h2 {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            color: var(--color-rose);
+            margin-bottom: 1rem;
+            text-shadow: 0 4px 10px rgba(255, 77, 109, 0.2);
+        }
+
+        .success-message p {
+            font-size: 1.3rem;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+        }
+
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 { font-size: 2.5rem; }
+            p.subtext { font-size: 1rem; }
+            .buttons { flex-direction: column; gap: 1rem; align-items: center; }
+            button { width: 100%; max-width: 250px; }
+            .success-message h2 { font-size: 2rem; }
+        }
+
+        /* Utility for hiding elements smoothly */
+        .hidden {
+            opacity: 0;
+            pointer-events: none;
+            transform: scale(0.95);
+        }
+
+        /* Heart animation for success */
+        .heart-float {
+            position: fixed;
+            color: #ff4d6d;
+            font-size: 24px;
+            animation: float-up-fade 2s ease-out forwards;
+            pointer-events: none;
+            z-index: 999;
+        }
+        
+        @keyframes float-up-fade {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.5); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Music -->
+    <!-- Note: Browsers often block autoplay. User interaction is usually required. -->
+    <audio id="bg-music" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-romantic-piano-2200.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="floating-hearts-container" id="bg-hearts"></div>
+
+    <div class="container" id="main-container">
+        <h1>Will You Be My<br>Valentine?</h1>
+        <p class="subtext">You make my world brighter every single day.</p>
+        
+        <div class="buttons">
+            <button class="btn-yes" id="yes-btn">Yes, I will! 💖</button>
+            <button class="btn-no" id="no-btn">No</button>
+        </div>
+    </div>
+
+    <div class="success-message" id="success-msg">
+        <h2>You just made me the happiest person alive. ❤️</h2>
+        <p>I promise to make every moment with you special.</p>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const yesBtn = document.getElementById('yes-btn');
+            const noBtn = document.getElementById('no-btn');
+            const mainContainer = document.getElementById('main-container');
+            const successMsg = document.getElementById('success-msg');
+            const bgMusic = document.getElementById('bg-music');
+            const bgHeartsContainer = document.getElementById('bg-hearts');
+
+            // --- Background Hearts Animation ---
+            function createFloatingHeart() {
+                const heart = document.createElement('div');
+                heart.classList.add('heart-bg');
+                heart.innerHTML = '❤';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.fontSize = Math.random() * 20 + 10 + 'px';
+                heart.style.animationDuration = Math.random() * 5 + 5 + 's'; // 5-10s
+                
+                bgHeartsContainer.appendChild(heart);
+                
+                // Cleanup
+                setTimeout(() => {
+                    heart.remove();
+                }, 10000);
+            }
+
+            // Create hearts periodically
+            setInterval(createFloatingHeart, 500);
+
+            // --- No Button Logic ---
+            function moveButton() {
+                // Get viewport dimensions
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Get button dimensions
+                const btnRect = noBtn.getBoundingClientRect();
+                const btnWidth = btnRect.width;
+                const btnHeight = btnRect.height;
+                
+                // Calculate safe area (padding from edges)
+                const padding = 20;
+                
+                // Calculate random position
+                // Ensure it stays within viewport
+                const maxLeft = viewportWidth - btnWidth - padding;
+                const maxTop = viewportHeight - btnHeight - padding;
+                
+                const randomLeft = Math.max(padding, Math.floor(Math.random() * maxLeft));
+                const randomTop = Math.max(padding, Math.floor(Math.random() * maxTop));
+                
+                // Use fixed positioning to move it anywhere on screen relative to viewport
+                noBtn.style.position = 'fixed';
+                noBtn.style.left = randomLeft + 'px';
+                noBtn.style.top = randomTop + 'px';
+                
+                // Reset transform if any (from CSS hover effects, though we want clean movement)
+                noBtn.style.transform = 'none';
+            }
+
+            // Desktop: Hover
+            noBtn.addEventListener('mouseover', moveButton);
+            // Mobile: Touch/Click
+            noBtn.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent accidental clicking
+                moveButton();
+            });
+            noBtn.addEventListener('touchstart', (e) => {
+                 e.preventDefault(); // Prevent default touch behavior
+                 moveButton();
+            });
+
+            // --- Yes Button Logic ---
+            yesBtn.addEventListener('click', () => {
+                // Try to play music (might require user interaction policy to be satisfied, which a click is)
+                bgMusic.volume = 0.5;
+                bgMusic.play().catch(e => console.log("Audio play failed (browser policy):", e));
+
+                // 1. Fade out container
+                mainContainer.classList.add('hidden');
+                
+                // 2. Wait for transition, then hide container and show success
+                setTimeout(() => {
+                    mainContainer.style.display = 'none';
+                    successMsg.style.display = 'block';
+                    
+                    // Create an explosion of hearts
+                    createHeartExplosion();
+                }, 500); // 500ms matches some transition times
+            });
+
+            // --- Success Animation ---
+            function createHeartExplosion() {
+                const interval = setInterval(() => {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart-float');
+                    heart.innerHTML = '💖';
+                    heart.style.left = Math.random() * 100 + 'vw';
+                    heart.style.top = Math.random() * 100 + 'vh';
+                    heart.style.fontSize = Math.random() * 30 + 20 + 'px';
+                    
+                    document.body.appendChild(heart);
+                    
+                    setTimeout(() => {
+                        heart.remove();
+                    }, 2000);
+                }, 100);
+
+                // Stop after 5 seconds
+                setTimeout(() => {
+                    clearInterval(interval);
+                }, 5000);
+            }
+        });
+    </script>
+</body>
+</html>
