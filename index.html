@@ -287,7 +287,7 @@
     <!-- Background Music -->
     <!-- Note: Browsers often block autoplay. User interaction is usually required. -->
     <audio id="bg-music" loop>
-        <source src="https://assets.mixkit.co/music/preview/mixkit-romantic-piano-2200.mp3" type="audio/mpeg">
+        <source src="bg-music.mp3" type="audio/mpeg">
         Your browser does not support the audio element.
     </audio>
 
@@ -307,6 +307,14 @@
         <h2>You just made me the happiest person alive. ❤️</h2>
         <p>I promise to make every moment with you special.</p>
     </div>
+
+    <!-- Sound Effects -->
+    <audio id="no-sound" preload="auto">
+        <source src="no-sound.mp3" type="audio/mpeg">
+    </audio>
+    <audio id="yes-sound" preload="auto">
+        <source src="yes-sound.mp3" type="audio/mpeg">
+    </audio>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -337,8 +345,30 @@
             // Create hearts periodically
             setInterval(createFloatingHeart, 500);
 
+            const noSound = document.getElementById('no-sound');
+            const yesSound = document.getElementById('yes-sound');
+
+            // --- Audio Logic ---
+            // Try to play background music on first interaction
+            document.body.addEventListener('click', () => {
+                if (bgMusic.paused) {
+                    bgMusic.volume = 0.5;
+                    bgMusic.play().catch(() => { });
+                }
+            }, { once: true });
+
+            // Helper to play sound
+            function playSound(audioElement) {
+                if (audioElement) {
+                    audioElement.currentTime = 0;
+                    audioElement.play().catch(() => { });
+                }
+            }
+
             // --- No Button Logic ---
             function moveButton() {
+                playSound(noSound); // Play sound when moving/hovering
+
                 // If button is still inside the container, move it to body
                 // This prevents containing block issues with backdrop-filter/transform
                 if (noBtn.parentNode !== document.body) {
@@ -374,9 +404,6 @@
                 let randomLeft = Math.max(padding, Math.floor(Math.random() * maxLeft));
                 let randomTop = Math.max(padding, Math.floor(Math.random() * maxTop));
 
-                // Optional: Ensure it doesn't move too close to current mouse position (if we had it)
-                // For now, pure random is usually fine as it jumps instantly
-
                 // Apply new position
                 noBtn.style.left = randomLeft + 'px';
                 noBtn.style.top = randomTop + 'px';
@@ -401,9 +428,11 @@
 
             // --- Yes Button Logic ---
             yesBtn.addEventListener('click', () => {
-                // Try to play music (might require user interaction policy to be satisfied, which a click is)
+                playSound(yesSound); // Play success sound
+
+                // Bg music volume adjustment or continue playing
                 bgMusic.volume = 0.5;
-                bgMusic.play().catch(e => console.log("Audio play failed (browser policy):", e));
+                bgMusic.play().catch(() => { });
 
                 // 1. Fade out container
                 mainContainer.classList.add('hidden');
